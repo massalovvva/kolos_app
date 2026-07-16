@@ -48,4 +48,27 @@ class AppTextStyles {
     letterSpacing: 0.5,
     color: AppColors.textMuted,
   );
+
+  static TextStyle muted = GoogleFonts.inter(
+    fontSize: 13,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textMuted,
+  );
+
+  static TextStyle questionLabel = GoogleFonts.inter(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+    color: AppColors.textPrimary,
+  );
+
+  static TextStyle questionHint = GoogleFonts.inter(
+    fontSize: 12,
+    fontWeight: FontWeight.w400,
+    color: AppColors.textMuted,
+  );
+
+  static TextStyle scaleNumber = GoogleFonts.inter(
+    fontSize: 14,
+    fontWeight: FontWeight.w600,
+  );
 }

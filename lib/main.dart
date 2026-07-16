@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'screens/login_screen.dart';
+import 'package:kolos_app/screens/checkin_screen.dart';
+
+//import 'screens/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +33,7 @@ class MyApp extends StatelessWidget {
         // tested with just a hot reload.
         colorScheme: .fromSeed(seedColor: Colors.deepPurple),
       ),
-      home: const LoginScreen(),
+      home: const CheckInScreen(),
     );
   }
 }
