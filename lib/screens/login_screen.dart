@@ -4,6 +4,10 @@ import 'package:flutter_svg/svg.dart';
 import 'package:kolos_app/dashed_divider.dart';
 import 'package:kolos_app/theme/colors.dart';
 import 'package:kolos_app/theme/text_styles.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kolos_app/screens/checkin_screen.dart';
+import 'package:kolos_app/screens/coach_dashboard_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,6 +26,53 @@ void dispose() {
   passwordController.dispose();
   super.dispose();
 }
+
+
+Future<void> _handleLogin() async {
+  try {
+    
+    final credential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),
+      );
+
+  final uid = credential.user!.uid;
+
+  final userDoc = await FirebaseFirestore.instance
+                                          .collection('users')
+                                          .doc(uid)
+                                          .get();
+
+  if (!userDoc.exists) {
+    return;
+  }
+
+  final role = userDoc.data()!['role'];
+
+  if (!mounted) return;
+
+  if (role == 'player') {
+    Navigator.pushReplacement(
+      context, 
+      MaterialPageRoute(builder: (_) => const CheckInScreen()),
+    );
+  
+  } else if (role == 'coach') {
+      Navigator.pushReplacement(
+      context, 
+      MaterialPageRoute(builder: (_) => const CoachDashboardScreen()),
+      );
+  }
+} on FirebaseAuthException catch (e) {
+  if (!mounted) return;
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(content: Text(e.message ?? 'Login failed')),
+  );
+}
+
+  
+
+}//Future
 
 
 
@@ -107,8 +158,8 @@ void dispose() {
                             ),
                           ),
                           const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () {},
+                          ElevatedButton( 
+                            onPressed: _handleLogin,
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.white,
                               foregroundColor: const Color(0xFF0D1117),

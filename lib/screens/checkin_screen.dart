@@ -1,9 +1,11 @@
+import "package:cloud_firestore/cloud_firestore.dart";
 import "package:flutter/material.dart";
 import "package:kolos_app/dashed_divider.dart";
 import "package:kolos_app/theme/colors.dart";
 import "package:kolos_app/theme/text_styles.dart";
 import "package:intl/intl.dart";
 import "package:kolos_app/widgets/scale_question.dart";
+import 'package:firebase_auth/firebase_auth.dart';
 
 
 class CheckInScreen extends StatefulWidget{
@@ -36,7 +38,56 @@ class _CheckInScreenState extends State<CheckInScreen> {
         }
         
         return true;
+
   }
+
+Future<void> _handleSubmit() async {
+    if (!allAnswered) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("Please answer all questions before submitting.",
+                              style: TextStyle( color: AppColors.textOnAccent)),
+                              duration: Duration(seconds: 1),
+                              backgroundColor: Colors.white,
+                              behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                            return;
+                          }
+
+final uid = FirebaseAuth.instance.currentUser!.uid;
+final today = DateTime.now();
+final dateId = "${today.year}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
+
+try {
+  await FirebaseFirestore.instance.collection('checkins').add({
+    'playerUid': uid,
+    'date': dateId,
+    'submittedAt': FieldValue.serverTimestamp(),
+    'sleep': sleepValue,
+    'soreness': muscleSoreness,
+    'energy': energyLevel,
+    'mood': mood,
+    'hasPain': hasPain,
+    'painNote': hasPain == true ? painController.text.trim() : null,
+  });
+
+  if (!mounted) return;
+
+ScaffoldMessenger.of(context).showSnackBar(
+  const SnackBar(
+    content: Text("Check-in submitted!"),
+    duration: Duration(seconds: 1),
+));
+} catch (e) {
+  if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Something went wrong: $e")),
+    );
+    
+
+}
+
+}
 
 @override
 void initState() {
@@ -216,19 +267,7 @@ void initState() {
                       const SizedBox(height: 12),
 
                       ElevatedButton(
-                        onPressed: () { 
-                          if (!allAnswered) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("Please answer all questions before submitting.",
-                              style: TextStyle( color: AppColors.textOnAccent)),
-                              duration: Duration(seconds: 1),
-                              backgroundColor: Colors.white,
-                              behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                            return;
-                          }
-                        },
+                        onPressed: _handleSubmit,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: allAnswered ? Colors.white : AppColors.surface,
                           foregroundColor: allAnswered ? AppColors.background : AppColors.textMuted,
